@@ -1,0 +1,66 @@
+{% extends 'main.html' %}
+{% block uztagger %}active{% endblock %}
+{% block main %}
+    <section class="content">
+        <div class="container-fluid">
+            <div class="card card-primary card-outline">
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-sm-6">
+                        <textarea class="form-control" name="mytextarea" id="text" rows="6"
+                                  placeholder="Enter text"></textarea>
+                            <button class="btn btn-primary mt-3" onclick="sendPostRequest()">Submit</button>
+                        </div>
+                        <div class="col-sm-6">
+                            <textarea class="form-control" id="result" rows="6" placeholder="Tagged text"></textarea>
+                        </div>
+                    </div>
+                </div>
+                <!-- /.card -->
+            </div>
+            <!-- /.card -->
+        </div>
+
+        <script>
+            function getCSRFToken() {
+                return document.cookie.split('; ')
+                    .find(row => row.startsWith('csrftoken='))
+                    ?.split('=')[1];
+            }
+
+            async function sendPostRequest() {
+                var textValue = document.getElementById('text').value.trim();
+                if (!textValue) {
+                    alert("Введите текст!");
+                    return;
+                }
+
+                var url = window.location.origin + '/api/postagging/';
+
+                try {
+                    var response = await fetch(url, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Accept': 'application/json',
+                            'X-CSRFToken': getCSRFToken()
+                        },
+                        body: JSON.stringify({text: textValue})
+                    });
+
+                    if (!response.ok) {
+                        console.error('Ошибка запроса. Статус:', response.status);
+                        return;
+                    }
+
+                    var data = await response.json();
+                    document.getElementById('result').textContent = JSON.stringify(data.result);
+                } catch (error) {
+                    console.error('Ошибка сети:', error);
+                }
+            }
+        </script>
+
+        <!-- /.container-fluid -->
+    </section>
+{% endblock %}

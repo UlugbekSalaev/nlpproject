@@ -1,0 +1,35 @@
+{% extends 'main.html' %}
+{% block main %}
+<section class="content">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="card card-primary card-outline col-md-6">
+                <div class="card-header">
+                    <h3>My Publications</h3>Author Profiles
+                </div>
+                <div class="card-body">
+                    <h3><a href="https://scholar.google.com/citations?user=-YxQf8AAAAAJ&hl=en">Google Scholar</a></h3>
+                    <br>
+                    <h3><a href="https://www.researchgate.net/profile/Ulugbek-Salaev/research">ResearchGate</a></h3><br>
+                    <h3><a href="https://www.scopus.com/authid/detail.uri?authorId=57702541100">Scopus</a></h3><br>
+                    <h3><a href="https://www.webofscience.com/wos/author/record/IAP-0431-2023">Web of Science</a></h3>
+                    <br>
+                    <h3><a href="https://orcid.org/0000-0003-3020-7099">ORCID</a></h3><br>
+
+
+                </div>
+            </div>
+            <div class="card card-primary card-outline col-md-6">
+                <div class="card-header">
+                    <h3>Citations</h3>
+                </div>
+                <div class="card-body">
+                    <?php include_once("./citations.php");?>
+                </div>
+            </div>
+        </div>
+        <!-- /.card -->
+    </div>
+    <!-- /.container-fluid -->
+</section>
+{% endblock %}

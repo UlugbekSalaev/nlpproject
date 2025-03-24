@@ -1,0 +1,103 @@
+{% extends 'main.html' %}
+{% block translit %}active{% endblock %}
+{% block main %}
+<section class="content">
+    <div class="container-fluid">
+        <div class="card card-primary card-outline">
+            <div class="card-body">
+                <div class='row'>
+                    <div class='col-sm-auto'>
+                        <h3>Transliteration between Uzbek alphabets</h3>
+                    </div>
+                </div>
+                <br>
+                <div class="row">
+                    <div class="col-sm-6">
+                        <div class="btn-group btn-group-toggle" data-toggle="buttons">
+                            <label class="btn btn-secondary active">
+                                <input type="radio" name="from_" id="from_" value="lat" autocomplete="off">Latin
+                            </label>
+                            <label class="btn btn-secondary">
+                                <input type="radio" name="from_" id="from_" value="nlat" autocomplete="off">New Latin
+                            </label>
+                            <label class="btn btn-secondary">
+                                <input type="radio" name="from_" id="from_" value="cyr" autocomplete="off" checked>Cyrillic
+                            </label>
+                        </div>
+
+                        <textarea class="form-control" name="mytextarea" id="text" rows="6"
+                                  placeholder="Enter text..."></textarea>
+                    </div>
+                    <div class="col-sm-6">
+                        <div class="btn-group btn-group-toggle" data-toggle="buttons">
+                            <label class="btn btn-secondary active">
+                                <input type="radio" name="to" id="to" value="lat" autocomplete="off" checked>Latin
+                            </label>
+                            <label class="btn btn-secondary">
+                                <input type="radio" name="to" id="to" value="nlat" autocomplete="off">New Latin
+                            </label>
+                            <label class="btn btn-secondary">
+                                <input type="radio" name="to" id="to" value="cyr" autocomplete="off">Cyrillic
+                            </label>
+                        </div>
+
+                        <textarea class="form-control" id="result" rows="6" placeholder="Transliteration"></textarea>
+                    </div>
+                </div>
+                <div class="row">
+                    <button class="btn btn-primary mt-3" onclick="sendPostRequest()">Transliterate</button>
+                </div>
+            </div>
+            <!-- /.card -->
+        </div>
+        <!-- /.card -->
+    </div>
+
+<script>
+    function getCSRFToken() {
+        return document.cookie.split('; ')
+            .find(row => row.startsWith('csrftoken='))
+            ?.split('=')[1];
+    }
+
+    function sendPostRequest() {
+        var text = document.getElementById('text').value;
+        var from_ = document.querySelector('input[name="from_"]:checked')?.value;
+        var to = document.querySelector('input[name="to"]:checked')?.value;
+
+        if (!from_ || !to) {
+            alert("Please select both 'from' and 'to' options.");
+            return;
+        }
+
+        if (from_ === to) {
+            alert("Please use different directions.");
+            return;
+        }
+
+        var url = window.location.origin + '/api/translit/';
+
+        var xhr = new XMLHttpRequest();
+        xhr.open('POST', url, true);
+
+        xhr.setRequestHeader('Content-Type', 'application/json');
+        xhr.setRequestHeader('Accept', 'application/json');
+        xhr.setRequestHeader('X-CSRFToken', getCSRFToken());
+
+        xhr.onload = function () {
+            if (xhr.status === 200) {
+                var response = JSON.parse(xhr.responseText);
+                document.getElementById('result').textContent = response.result;
+            } else {
+                console.error('Ошибка запроса. Статус:', xhr.status);
+            }
+        };
+
+        var data = JSON.stringify({ text: text, from_: from_, to: to });
+        xhr.send(data);
+    }
+</script>
+
+    <!-- /.container-fluid -->
+</section>
+{% endblock %}

@@ -1,0 +1,99 @@
+{% extends 'main.html' %}
+{% block uzmorphanalyser %}active{% endblock %}
+{% block main %}
+    <section class="content">
+        <div class="container-fluid">
+            <div class="card card-primary card-outline">
+                <div class="card-body">
+                    <div class="row">
+
+                        <div class="col-sm-12">
+                            <div class="row">
+                                <p><b>Note:</b> Select one or more options of following methods. Input each item line by
+                                    line
+                                    to perform the selected method(s). </p>
+                                <p>An input item must be one of the following formats: <i>word</i>&nbsp; or &nbsp;<i>word,pos_tag</i>.
+                                </p>
+                                <p>Example: &nbsp;<i>maktabimda</i>&nbsp; or &nbsp; <i>maktabimda,NOUN</i>. Use one of
+                                    the
+                                    available POS tags.</p>
+                                <p>Result will be in the following order: &nbsp; <i>word stem lemma [analyse]</i></p>
+                            </div>
+                            <div class="row">
+                                Available POS tags: <b>NOUN</b>, <b>VERB</b>, <b>NUM</b>, <b>ADJ</b>, <b>PRN</b>,
+                                <b>ADV</b>
+                                &nbsp;&nbsp;
+                                [Noun, Verb, Numeric, Adjective, Pronoun, Adverb]
+                            </div>
+                            <br>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-3">
+                            <textarea class="form-control" name="mytextarea" id="text" rows="6" placeholder="Word">maktablarimizni,NOUN</textarea>
+                            <button class="btn btn-primary mt-3" onclick="sendPostRequest()">Submit</button>
+                        </div>
+                        <div class="col-sm-9">
+                            <textarea class="form-control" id="result" rows="6" placeholder="Result"></textarea>
+                        </div>
+                    </div>
+                </div>
+                <!-- /.card -->
+            </div>
+            <!-- /.card -->
+        </div>
+
+        <script>
+            function getCSRFToken() {
+                return document.cookie.split('; ')
+                    .find(row => row.startsWith('csrftoken='))
+                    ?.split('=')[1];
+            }
+
+            function sendPostRequest() {
+                var resultElement = document.getElementById('result');
+                resultElement.textContent = ""; // Очистка результата
+                var allResults = [];
+
+                var textValue = document.getElementById('text').value;
+                var lines = textValue.split('\n');
+
+                lines.forEach((line, index) => {
+                    var parts = line.split(',');
+                    if (parts.length < 2) return; // Пропускаем некорректные строки
+
+                    var word = parts[0].trim();
+                    var pos = parts[1].trim();
+
+                    RetrieveRequest(word, pos, allResults, resultElement);
+                });
+            }
+
+            function RetrieveRequest(word, pos, allResults, resultElement) {
+                var xhr = new XMLHttpRequest();
+                var url = window.location.origin + '/api/uzmorphanalyser/';
+
+                xhr.open('POST', url, true);
+                xhr.setRequestHeader('Content-Type', 'application/json');
+                xhr.setRequestHeader('Accept', 'application/json');
+                xhr.setRequestHeader('X-CSRFToken', getCSRFToken());
+
+                xhr.onload = function () {
+                    if (xhr.status === 200) {
+                        var response = JSON.parse(xhr.responseText);
+                        allResults.push(JSON.stringify(response.result));
+
+                        resultElement.textContent = allResults.join('\n'); // Обновление результата
+                    } else {
+                        console.error('Ошибка запроса. Статус:', xhr.status);
+                    }
+                };
+
+                var data = JSON.stringify({word: word, pos: pos});
+                xhr.send(data);
+            }
+        </script>
+
+        <!-- /.container-fluid -->
+    </section>
+{% endblock %}
